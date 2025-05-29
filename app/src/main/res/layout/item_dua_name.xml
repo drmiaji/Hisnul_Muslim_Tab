@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="@dimen/card_elevation">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Number Badge -->
+        <TextView
+            android:id="@+id/dua_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/circle_background"
+            android:gravity="center"
+            android:minWidth="32dp"
+            android:minHeight="32dp"
+            android:text="@string/_1"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Dua Name -->
+            <TextView
+                android:id="@+id/dua_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dua_name"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <!-- Chapter Name -->
+            <TextView
+                android:id="@+id/chapter_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/chapter_name"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="14sp"
+                tools:ignore="HardcodedText" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

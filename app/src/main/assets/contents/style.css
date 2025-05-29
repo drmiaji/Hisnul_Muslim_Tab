@@ -1,0 +1,177 @@
+/* ========== BASE STYLES ========== */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #111111;
+    --arabic-color: #000000;
+    --heading-color: #006400;
+    --quote-bg: #f5f5f5;
+    --quote-border: #006400;
+    --button-bg: #f9f9f9;
+    --button-text: #333333;
+    --button-border: #cccccc;
+    --button-hover-bg: #eaeaea;
+    --reference-color: #888888;
+    --highlight-color: #b22222;
+    --link-color: #0047AB;
+    --hr-color: #dddddd;
+}
+
+.dark {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --arabic-color: #dddddd;
+    --heading-color: #90ee90;
+    --quote-bg: #202020;
+    --quote-border: #90ee90;
+    --button-bg: #1f1f1f;
+    --button-text: #e0e0e0;
+    --button-border: #333333;
+    --button-hover-bg: #2c2c2c;
+    --reference-color: #999999;
+    --highlight-color: #ff7f7f;
+    --link-color: #90caf9;
+    --hr-color: #444444;
+}
+/* ========== FONT DECLARATIONS ========== */
+@font-face {
+    font-family: 'Solaimanlipi';
+    src: url('../fonts/solaimanlipi.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'quran-arabic';
+    src: url('../fonts/indopak.ttf') format('truetype');
+    font-display: swap;
+}
+
+/* ========== BODY & TYPOGRAPHY ========== */
+html, body {
+    margin: 0;
+    padding: 16px;
+    font-family: 'Solaimanlipi', 'Segoe UI', 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    text-align: justify;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========== TEXT ELEMENTS ========== */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    color: var(--heading-color);
+    margin: 16px 0 8px;
+    direction: ltr;
+    text-align: left;
+    font-size: 20px;
+}
+
+.arabic {
+    font-family: 'quran-arabic', serif;
+    font-size: 22px;
+    color: var(--arabic-color);
+    direction: rtl;
+    text-align: justify;
+    line-height: 1.8;
+    margin: 16px 0;
+}
+
+.bangla, .translation {
+    font-size: 16px;
+    color: var(--text-color);
+    margin: 12px 0;
+}
+
+.transliteration {
+    display: none;
+    font-size: 16px;
+    color: var(--reference-color);
+    font-style: italic;
+    margin: 8px 0;
+}
+
+.reference {
+    font-size: 14px;
+    color: var(--reference-color);
+    margin: 8px 0;
+    font-weight: bold;
+}
+
+.highlight {
+    font-weight: bold;
+    color: var(--highlight-color);
+}
+
+/* ========== QUOTES & BLOCKS ========== */
+blockquote, .bangla-quote {
+    font-size: 16px;
+    padding: 10px 16px;
+    margin: 12px 0;
+    background-color: var(--quote-bg);
+    border-left: 4px solid var(--quote-border);
+    border-radius: 6px;
+    color: var(--text-color);
+}
+
+/* ========== BUTTONS & CONTROLS ========== */
+.top-button {
+    padding: 8px 14px;
+    font-size: 16px;
+    font-family: 'Solaimanlipi';
+    border: 1px solid var(--button-border);
+    border-radius: 6px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.top-button:hover {
+    background-color: var(--button-hover-bg);
+    border-color: var(--button-border);
+}
+
+#themeToggle, #goTopBtn {
+    position: fixed;
+    z-index: 1000;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--link-color);
+    color: var(--bg-color);
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* ========== MISC ========== */
+hr {
+    margin: 20px 0;
+    border: 1px solid var(--hr-color);
+}
+
+.toc a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+/* ========== UTILITY CLASSES ========== */
+body.show-transliteration .transliteration {
+    display: block;
+}
+
+.error-message {
+    color: var(--highlight-color);
+    padding: 20px;
+    text-align: center;
+}
+
+.chapter-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 16px 0 8px 0;
+    text-align: center;
+}
