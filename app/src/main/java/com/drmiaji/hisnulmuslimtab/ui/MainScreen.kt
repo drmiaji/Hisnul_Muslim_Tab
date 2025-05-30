@@ -4,6 +4,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,8 +65,11 @@ import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.CompositionLocalProvider
 import com.drmiaji.hisnulmuslimtab.activity.About
 import com.drmiaji.hisnulmuslimtab.models.DrawerItem
 import com.drmiaji.hisnulmuslimtab.ui.theme.topBarColors
@@ -83,6 +87,8 @@ fun MainScreen(viewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
     var showMenu by remember { mutableStateOf(false) }
     var showSearchDialog by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val isDarkTheme = isSystemInDarkTheme()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -193,22 +199,6 @@ fun MainScreen(viewModel: MainViewModel) {
                                 var showSearchDialog by remember { mutableStateOf(false) }
 
                                 DropdownMenuItem(
-                                    text = { Text("Search") },
-                                    onClick = {
-                                        showMenu = false
-                                        showSearchDialog = true
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("About") },
-                                    onClick = {
-                                        context.startActivity(Intent(context, About::class.java))
-                                        showMenu = false
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
-                                )
-                                DropdownMenuItem(
                                     text = { Text("Settings") },
                                     onClick = {
                                         context.startActivity(Intent(context, SettingsActivity::class.java))
@@ -249,6 +239,14 @@ fun MainScreen(viewModel: MainViewModel) {
                                         showMenu = false
                                     },
                                     leadingIcon = { Icon(Icons.Default.PrivacyTip, contentDescription = null) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("About") },
+                                    onClick = {
+                                        context.startActivity(Intent(context, About::class.java))
+                                        showMenu = false
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
                                 )
                             }
                         }
@@ -307,27 +305,44 @@ fun MainScreen(viewModel: MainViewModel) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     TabText(
-                        text = "Category",
+                        text = "ক্যাটাগরি/শ্রেণী",
                         selected = selectedTab == MainTab.CATEGORY,
                         onClick = { viewModel.selectTab(MainTab.CATEGORY) }
                     )
                     Spacer(Modifier.width(32.dp))
                     TabText(
-                        text = "Chapters",
+                        text = "বিষয় ভিত্তিক",
                         selected = selectedTab == MainTab.CHAPTERS,
                         onClick = { viewModel.selectTab(MainTab.CHAPTERS) }
                     )
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
 
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    placeholder = { Text("Search chapters...") },
+                    singleLine = true
+                )
+
                 // Main Content Area
                 if (selectedTab == MainTab.CATEGORY) {
                     val filteredChapters = remember(selectedCategory, allChapters) {
                         allChapters.filter { it.category == selectedCategory?.name }
+                            .filter { searchQuery.isBlank() || it.chapname?.contains(searchQuery, ignoreCase = true) == true }
+                    }
+                    // Add this BEFORE the Row, after you have categories and searchQuery
+                    val filteredCategories = remember(categories, searchQuery) {
+                        if (searchQuery.isBlank()) categories
+                        else categories.filter { it.name?.contains(searchQuery, ignoreCase = true) == true }
                     }
                     Row(Modifier.fillMaxSize()) {
                         CategoryGridPane(
-                            categories = categories,
+                            categories = filteredCategories,
                             selectedCategory = selectedCategory,
                             onCategoryClick = { viewModel.selectCategory(it) },
                             modifier = Modifier.width(200.dp).fillMaxHeight()
@@ -355,9 +370,13 @@ fun MainScreen(viewModel: MainViewModel) {
                             }
                         )
                     }
-                } else {
+                }
+                if (selectedTab == MainTab.CHAPTERS) {
+                    val filteredChapters = remember(allChapters, searchQuery) {
+                        allChapters.filter { searchQuery.isBlank() || it.chapname?.contains(searchQuery, ignoreCase = true) == true }
+                    }
                     ChapterListPane(
-                        chapters = allChapters,
+                        chapters = filteredChapters,
                         showCategoryTitle = false,
                         categoryTitle = null,
                         modifier = Modifier.fillMaxSize(),
@@ -388,11 +407,14 @@ fun MainScreen(viewModel: MainViewModel) {
 fun TabText(text: String, selected: Boolean, onClick: () -> Unit) {
     Text(
         text = text,
-        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        fontSize = 18.sp,
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(vertical = 4.dp)
+            .padding(vertical = 8.dp, horizontal = 24.dp),
+        style = TextStyle(
+            fontFamily = FontManager.getSolaimanLipiFontFamily(),
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = 20.sp,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
     )
 }

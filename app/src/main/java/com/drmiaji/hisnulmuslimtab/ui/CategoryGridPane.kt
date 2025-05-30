@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drmiaji.hisnulmuslimtab.data.entities.Category
+import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
 
 @Composable
 fun CategoryGridPane(
@@ -58,8 +59,9 @@ fun CategoryGridPane(
                     Spacer(Modifier.width(14.dp))
                     Text(
                         category.name.orEmpty(),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 15.sp
+                        fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp
                     )
                 }
             }

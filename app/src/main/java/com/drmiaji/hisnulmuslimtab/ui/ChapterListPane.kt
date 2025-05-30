@@ -1,7 +1,5 @@
 package com.drmiaji.hisnulmuslimtab.ui
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaName
 import androidx.compose.foundation.lazy.items
+import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
+import com.drmiaji.hisnulmuslimtab.utils.toBengaliNumberString
 
 @Composable
 fun ChapterListPane(
@@ -28,6 +28,7 @@ fun ChapterListPane(
         if (showCategoryTitle && !categoryTitle.isNullOrBlank()) {
             Text(
                 text = categoryTitle,
+                fontFamily = FontManager.getSolaimanLipiFontFamily(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 21.sp,
                 color = MaterialTheme.colorScheme.primary,
@@ -56,7 +57,8 @@ fun ChapterListPane(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = chapter.chap_id.toString(),
+                            text = chapter.chap_id.toBengaliNumberString(),
+                            fontFamily = FontManager.getSolaimanLipiFontFamily(),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.primary
@@ -65,12 +67,14 @@ fun ChapterListPane(
                         Column {
                             Text(
                                 text = chapter.chapname.orEmpty(),
+                                fontFamily = FontManager.getSolaimanLipiFontFamily(),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
+                                fontSize = 17.sp
                             )
                             if (!chapter.category.isNullOrBlank()) {
                                 Text(
                                     text = chapter.category,
+                                    fontFamily = FontManager.getSolaimanLipiFontFamily(),
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -81,13 +85,4 @@ fun ChapterListPane(
             }
         }
     }
-}
-
-fun openWebViewForChapter(context: Context, duaName: DuaName) {
-    val intent = Intent(context, WebViewActivity::class.java).apply {
-        putExtra("dua_id", duaName.chap_id) // <--- this is the fix!
-        putExtra("chapter_name", duaName.chapname ?: "")
-        putExtra("title", duaName.chapname)
-    }
-    context.startActivity(intent)
 }
