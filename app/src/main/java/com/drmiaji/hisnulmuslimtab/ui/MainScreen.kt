@@ -131,13 +131,28 @@ fun MainScreen(viewModel: MainViewModel) {
                 )
             }
         } else {
+            // FIX: Use the same logic for Chapters tab as Category tab
             ChapterListPane(
                 chapters = allChapters,
                 showCategoryTitle = false,
                 categoryTitle = null,
                 modifier = Modifier.fillMaxSize(),
                 onChapterClick = { chapter ->
-                    openWebViewForChapter(context, chapter)
+                    // Use the same coroutine logic as in Category tab
+                    coroutineScope.launch {
+                        val firstDetailId = viewModel.getFirstDuaDetailIdForChapter(chapter.chap_id)
+                        if (firstDetailId != null) {
+                            val intent = Intent(context, WebViewActivity::class.java).apply {
+                                putExtra("dua_id", firstDetailId)
+                                putExtra("chap_id", chapter.chap_id)
+                                putExtra("chapter_name", chapter.chapname ?: "")
+                                putExtra("title", chapter.chapname)
+                            }
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             )
         }

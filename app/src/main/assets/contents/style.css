@@ -175,3 +175,25 @@ body.show-transliteration .transliteration {
     margin: 16px 0 8px 0;
     text-align: center;
 }
+
+/* Add this to your existing style.css file */
+
+.dua-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ccc, transparent);
+    margin: 20px 0;
+    opacity: 0.6;
+}
+
+/* Alternative simpler divider style */
+.dua-divider-simple {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 15px 0;
+}
+
+/* You can also add some spacing to dua containers */
+.dua-container {
+    margin-bottom: 10px;
+}

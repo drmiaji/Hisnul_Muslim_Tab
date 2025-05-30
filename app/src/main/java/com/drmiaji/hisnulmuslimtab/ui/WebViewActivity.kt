@@ -83,29 +83,49 @@ class WebViewActivity : BaseActivity() {
 
     private fun loadAllDuaPages() {
         val selectedDuaId = intent.getIntExtra("dua_id", -1)
+        val selectedChapterId = intent.getIntExtra("chap_id", -1)
+
         lifecycleScope.launch {
             repository.getAllDuaDetailsSorted().collect { allDuaDetails ->
-                // Build HTML for each dua detail, using chapter name map
-                val htmlPages = allDuaDetails.map { detail ->
-                    val chapterName = duaIdToChapterName[detail.dua_global_id] ?: ""
-                    generateHtmlContent(listOf(detail), chapterName)
+                // Group dua details by dua_global_id (chapter)
+                val groupedByChapter = allDuaDetails.groupBy { it.dua_global_id }
+
+                // Build HTML for each chapter (group of dua details)
+                val htmlPages = groupedByChapter.map { (chapterId, duaDetailsInChapter) ->
+                    val chapterName = duaIdToChapterName[chapterId] ?: ""
+                    generateHtmlContent(duaDetailsInChapter, chapterName)
                 }
+
                 viewPager.adapter = WebViewPagerAdapter(this@WebViewActivity, htmlPages)
 
-                // Scroll to the selected dua if available
-                val startIndex = allDuaDetails.indexOfFirst { it.id == selectedDuaId }
-                if (startIndex >= 0) {
-                    viewPager.setCurrentItem(startIndex, false)
+                // Find the page containing the selected dua or chapter
+                val startPageIndex = if (selectedDuaId != -1) {
+                    // Find page by specific dua ID
+                    groupedByChapter.entries.indexOfFirst { (_, duaList) ->
+                        duaList.any { it.id == selectedDuaId }
+                    }
+                } else if (selectedChapterId != -1) {
+                    // Find page by chapter ID
+                    groupedByChapter.keys.indexOf(selectedChapterId)
+                } else {
+                    -1
                 }
 
-                // Update toolbar title as user swipes
+                if (startPageIndex >= 0) {
+                    viewPager.setCurrentItem(startPageIndex, false)
+                }
+
+                // Update toolbar title as user swipes between chapters
                 viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
-                        val duaDetail = allDuaDetails[position]
-                        val chapterName = duaIdToChapterName[duaDetail.dua_global_id] ?: getString(R.string.app_name)
-                        val titleTextView = findViewById<TextView>(R.id.toolbar_title)
-                        titleTextView.text = chapterName
+                        val chapterIds = groupedByChapter.keys.toList()
+                        if (position < chapterIds.size) {
+                            val currentChapterId = chapterIds[position]
+                            val chapterName = duaIdToChapterName[currentChapterId] ?: getString(R.string.app_name)
+                            val titleTextView = findViewById<TextView>(R.id.toolbar_title)
+                            titleTextView.text = chapterName
+                        }
                     }
                 })
             }
@@ -115,32 +135,54 @@ class WebViewActivity : BaseActivity() {
     private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
         val htmlBuilder = StringBuilder()
         htmlBuilder.append("""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link rel="stylesheet" type="text/css" href="style.css">
-            </head>
-            <body>
-        """)
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" type="text/css" href="style.css">
+        </head>
+        <body>
+    """)
+
         if (chapterName.isNotEmpty()) {
             htmlBuilder.append("<h3 class='chapter-title'>$chapterName</h3>")
         }
-        duaDetails.forEach { detail ->
+
+        duaDetails.forEachIndexed { index, detail ->
             htmlBuilder.append("<div class='dua-container'><div class='segment'>")
-            detail.top?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='top-text'>$it</div>") }
-            detail.arabic?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='arabic'>$it</div>") }
-            detail.transliteration?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='transliteration'>$it</div>") }
-            detail.translations?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='translation'>$it</div>") }
-            detail.bottom?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='bottom-text'>$it</div>") }
-            detail.reference?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='reference'>Reference: $it</div>") }
+
+            detail.top?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='top-text'>$it</div>")
+            }
+            detail.arabic?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='arabic'>$it</div>")
+            }
+            detail.transliteration?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='transliteration'>$it</div>")
+            }
+            detail.translations?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='translation'>$it</div>")
+            }
+            detail.bottom?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='bottom-text'>$it</div>")
+            }
+            detail.reference?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='reference'>Reference: $it</div>")
+            }
+
             htmlBuilder.append("</div></div>")
+
+            // Add divider line between duas (except for the last one)
+            if (index < duaDetails.size - 1) {
+                htmlBuilder.append("<hr class='dua-divider'>")
+            }
         }
+
         htmlBuilder.append("""
-            </body>
-            </html>
-        """)
+        </body>
+        </html>
+    """)
         return htmlBuilder.toString()
     }
 
