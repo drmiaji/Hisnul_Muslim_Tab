@@ -6,12 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.drmiaji.hisnulmuslimtab.data.entities.Category
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaName
 import com.drmiaji.hisnulmuslimtab.data.repository.HisnulMuslimRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 enum class MainTab { CATEGORY, CHAPTERS }
 
@@ -56,8 +58,8 @@ class MainViewModel(
             return MainViewModel(repository) as T
         }
     }
-    suspend fun getFirstDuaDetailIdForChapter(chapId: Int): Int? {
+    suspend fun getFirstDuaDetailIdForChapter(chapId: Int): Int? = withContext(Dispatchers.IO) {
         val duaDetails = repository.getDuaDetailsByGlobalId(chapId).firstOrNull()
-        return duaDetails?.firstOrNull()?.id
+        duaDetails?.firstOrNull()?.id
     }
 }
