@@ -138,11 +138,3 @@ fun DrawerCardItem(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    MyAppTheme {
-        MainScreen(onLogoClick = {})
-    }
-}
