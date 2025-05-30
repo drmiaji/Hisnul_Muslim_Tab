@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.drmiaji.hisnulmuslim"
+    namespace = "com.drmiaji.hisnulmuslimtab"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.drmiaji.hisnulmuslim"
+        applicationId = "com.drmiaji.hisnulmuslimtab"
         minSdk = 24
         targetSdk = 35
         versionCode = 11

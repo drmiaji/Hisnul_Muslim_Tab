@@ -19,8 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class com.drmiaji.hisnulmuslim.model.** { *; }
--keep class com.drmiaji.hisnulmuslim.** { *; }
+-keep class com.drmiaji.hisnulmuslimtab.model.** { *; }
+-keep class com.drmiaji.hisnulmuslimtab.** { *; }
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
