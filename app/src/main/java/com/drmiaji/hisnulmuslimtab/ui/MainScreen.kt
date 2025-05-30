@@ -5,15 +5,20 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -41,15 +46,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.drmiaji.hisnulmuslimtab.R
 import com.drmiaji.hisnulmuslimtab.activity.SettingsActivity
+import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
 import com.drmiaji.hisnulmuslimtab.viewmodel.MainTab
 import com.drmiaji.hisnulmuslimtab.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import com.drmiaji.hisnulmuslimtab.activity.About
+import com.drmiaji.hisnulmuslimtab.models.DrawerItem
+import com.drmiaji.hisnulmuslimtab.ui.theme.topBarColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +80,9 @@ fun MainScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    var selectedDrawerItem by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var showMenu by remember { mutableStateOf(false) }
+    var showSearchDialog by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -79,88 +100,191 @@ fun MainScreen(viewModel: MainViewModel) {
                     ),
                 drawerContainerColor = Color.Transparent
             ) {
-                DrawerContent(
-                    onMenuItemClick = { item ->
-                        selectedDrawerItem = item.title
-                        coroutineScope.launch { drawerState.close() }
-
-                        // Handle navigation: activity, link, etc.
-                        when {
-                            item.activityClass != null -> {
-                                context.startActivity(Intent(context, item.activityClass))
-                            }
-
-                            !item.linkUrl.isNullOrEmpty() -> {
-                                val intent = Intent(Intent.ACTION_VIEW, item.linkUrl.toUri())
-                                context.startActivity(intent)
-                            }
-
-                            item.title.contains("শেয়ার") || item.title.equals(
-                                "Share",
-                                ignoreCase = true
-                            ) -> {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(
-                                        Intent.EXTRA_SUBJECT,
-                                        context.getString(R.string.share_subject)
-                                    )
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        context.getString(R.string.share_message)
-                                    )
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        shareIntent,
-                                        "Share using"
+                Column(
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    // Logo/header
+                    MyLogo(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 24.dp)
+                    )
+                    HorizontalDivider()
+                    var selectedItem by remember { mutableStateOf<DrawerItem?>(null) }
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        groupedMenuItems.forEach { group ->
+                            item {
+                                Text(
+                                    text = group.groupTitle,
+                                    modifier = Modifier.padding(start = 24.dp, top = 12.dp, bottom = 6.dp),
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontManager.getSolaimanLipiFontFamily()
                                     )
                                 )
                             }
+                            itemsIndexed(group.items) { _, item ->
+                                DrawerCardItem(
+                                    item = item,
+                                    selected = item == selectedItem,
+                                    onClick = {
+                                        selectedItem = item
+                                        when {
+                                            item.activityClass != null -> {
+                                                context.startActivity(Intent(context, item.activityClass))
+                                            }
+                                            item.linkUrl != null -> {
+                                                if (item.linkUrl.contains("facebook.com")) {
+                                                    val browserIntent = Intent(Intent.ACTION_VIEW, item.linkUrl.toUri())
+                                                    context.startActivity(browserIntent)
+                                                } else {
+                                                    val intent = Intent(context, WebViewActivity::class.java).apply {
+                                                        putExtra("title", item.title)
+                                                        putExtra("url", item.linkUrl)
+                                                    }
+                                                    context.startActivity(intent)
+                                                }
+                                            }
+                                        }
+                                        scope.launch { drawerState.close() }
+                                    }
+                                )
+                            }
+                            item { Spacer(modifier = Modifier.height(10.dp)) }
                         }
-                    },
-                    onLogoClick = {
-                        coroutineScope.launch { drawerState.close() }
                     }
-                )
+                }
             }
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { MyLogo() },
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.app_name),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = TextStyle(
+                                fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                fontSize = 20.sp
+                            )
+                        )
+                    },
                     navigationIcon = {
-                        IconButton(onClick = { coroutineScope.launch { drawerState.open() } }) {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
                     },
                     actions = {
-                        // Search button
-                        IconButton(onClick = { /* TODO: Implement search navigation or dialog */ }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        }
-                        // Share button
-                        IconButton(onClick = {
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject))
-                                putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_message))
+                        // Overflow menu with About, Settings, Privacy
+                        Box {
+                            IconButton(onClick = { showMenu = !showMenu }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "More")
                             }
-                            context.startActivity(Intent.createChooser(shareIntent, "Share using"))
-                        }) {
-                            Icon(Icons.Default.Share, contentDescription = "Share")
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                var showSearchDialog by remember { mutableStateOf(false) }
+
+                                DropdownMenuItem(
+                                    text = { Text("Search") },
+                                    onClick = {
+                                        showMenu = false
+                                        showSearchDialog = true
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("About") },
+                                    onClick = {
+                                        context.startActivity(Intent(context, About::class.java))
+                                        showMenu = false
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Settings") },
+                                    onClick = {
+                                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                                        showMenu = false
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("শেয়ার") },
+                                    onClick = {
+                                        showMenu = false
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(
+                                                Intent.EXTRA_SUBJECT,
+                                                context.getString(R.string.share_subject)
+                                            )
+                                            putExtra(
+                                                Intent.EXTRA_TEXT,
+                                                context.getString(R.string.share_message)
+                                            )
+                                        }
+                                        context.startActivity(
+                                            Intent.createChooser(
+                                                shareIntent,
+                                                "Share using"
+                                            )
+                                        )
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Privacy Policy") },
+                                    onClick = {
+                                        val url = "https://drmiaji.github.io/Tajweed/privacy_policy.html"
+                                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                        context.startActivity(intent)
+                                        showMenu = false
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.PrivacyTip, contentDescription = null) }
+                                )
+                            }
                         }
-                        // Settings button
-                        IconButton(onClick = {
-                            context.startActivity(Intent(context, SettingsActivity::class.java))
-                        }) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                    }
+                    },
+                    colors = topBarColors()
                 )
-            },
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                if (showSearchDialog) {
+                    var query by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showSearchDialog = false },
+                        title = { Text("Search") },
+                        text = {
+                            TextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                label = { Text("Enter search term") },
+                                singleLine = true
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                // Implement your search logic here
+                                // For example: viewModel.search(query)
+                                showSearchDialog = false
+                            }) {
+                                Text("Search")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showSearchDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+            }
         ) { innerPadding ->
             Column(
                 Modifier
