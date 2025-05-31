@@ -26,7 +26,9 @@ fun ChapterListPane(
     showCategoryTitle: Boolean,
     categoryTitle: String?,
     modifier: Modifier = Modifier,
-    onChapterClick: (DuaName) -> Unit
+    onChapterClick: (DuaName) -> Unit,
+    isFavorite: (DuaName) -> Boolean,
+    onToggleFavorite: (DuaName) -> Unit
 ) {
     Column(modifier) {
         if (showCategoryTitle && !categoryTitle.isNullOrBlank()) {
@@ -84,17 +86,17 @@ fun ChapterListPane(
                                 )
                             }
                         }
+                        Spacer(Modifier.weight(1f)) // Push icon to the far right
+                        IconButton(
+                            onClick = { onToggleFavorite(chapter) }
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite(chapter)) Icons.Default.Star else Icons.Default.StarBorder,
+                                contentDescription = if (isFavorite(chapter)) "Remove Favorite" else "Add Favorite",
+                                tint = if (isFavorite(chapter)) Color.Yellow else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-//                    // Favorite icon button on the right
-//                    IconButton(
-//                        onClick = { onToggleFavorite(chapter) }
-//                    ) {
-//                        Icon(
-//                            imageVector = if (isFavorite(chapter)) Icons.Default.Star else Icons.Default.StarBorder,
-//                            contentDescription = if (isFavorite(chapter)) "Remove Favorite" else "Add Favorite",
-//                            tint = if (isFavorite(chapter)) Color.Yellow else MaterialTheme.colorScheme.onSurfaceVariant
-//                        )
-//                    }
                 }
             }
         }

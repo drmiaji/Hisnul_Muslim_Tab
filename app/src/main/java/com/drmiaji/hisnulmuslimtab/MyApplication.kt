@@ -18,7 +18,8 @@ class MyApplication : Application() {
         repository = HisnulMuslimRepository(
             database.categoryDao(),
             database.duaNameDao(),
-            database.duaDetailDao()
+            database.duaDetailDao(),
+            database.favoriteDao()
         )
     }
 }

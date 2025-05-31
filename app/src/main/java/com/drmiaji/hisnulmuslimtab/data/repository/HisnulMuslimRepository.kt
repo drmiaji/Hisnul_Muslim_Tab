@@ -3,18 +3,31 @@ package com.drmiaji.hisnulmuslimtab.data.repository
 import com.drmiaji.hisnulmuslimtab.data.dao.CategoryDao
 import com.drmiaji.hisnulmuslimtab.data.dao.DuaDetailDao
 import com.drmiaji.hisnulmuslimtab.data.dao.DuaNameDao
+import com.drmiaji.hisnulmuslimtab.data.dao.FavoriteDao
 import com.drmiaji.hisnulmuslimtab.data.entities.Category
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaName
+import com.drmiaji.hisnulmuslimtab.data.entities.FavoriteChapter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 class HisnulMuslimRepository(
     private val categoryDao: CategoryDao,
     private val duaNameDao: DuaNameDao,
-    private val duaDetailDao: DuaDetailDao
+    private val duaDetailDao: DuaDetailDao,
+    private val favoriteDao: FavoriteDao
 ) {
+    // Favorite operations
+    val favoriteChapters: Flow<Set<Int>> = favoriteDao.getAllFavorites()
+        .map { list -> list.map { it.chapId }.toSet() }
+
+    suspend fun isFavorite(chapId: Int): Boolean = favoriteDao.isFavorite(chapId)
+
+    suspend fun addFavorite(chapId: Int) = favoriteDao.insertFavorite(FavoriteChapter(chapId))
+
+    suspend fun removeFavorite(chapId: Int) = favoriteDao.deleteFavorite(chapId)
     // Category operations
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
     suspend fun getCategoryById(id: Int): Category? = categoryDao.getCategoryById(id)

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 enum class MainTab {
@@ -71,14 +72,13 @@ class MainViewModel(
 
     /** Toggle favorite status for a chapter */
     fun toggleFavorite(chapter: DuaName) {
-        val currentFavorites = _favoriteChapterIds.value.toMutableSet()
-        if (chapter.chap_id in currentFavorites) {
-            currentFavorites.remove(chapter.chap_id)
-        } else {
-            currentFavorites.add(chapter.chap_id)
+        viewModelScope.launch {
+            if (isFavorite(chapter)) {
+                repository.removeFavorite(chapter.chap_id)
+            } else {
+                repository.addFavorite(chapter.chap_id)
+            }
         }
-        _favoriteChapterIds.value = currentFavorites
-        // TODO: persist favorites if needed
     }
 
     /** Check if a chapter is favorite */

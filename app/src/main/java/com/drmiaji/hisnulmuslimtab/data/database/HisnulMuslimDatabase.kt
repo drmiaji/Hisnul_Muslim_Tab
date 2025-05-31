@@ -8,13 +8,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.drmiaji.hisnulmuslimtab.data.dao.CategoryDao
 import com.drmiaji.hisnulmuslimtab.data.dao.DuaDetailDao
 import com.drmiaji.hisnulmuslimtab.data.dao.DuaNameDao
+import com.drmiaji.hisnulmuslimtab.data.dao.FavoriteDao
 import com.drmiaji.hisnulmuslimtab.data.entities.Category
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaName
+import com.drmiaji.hisnulmuslimtab.data.entities.FavoriteChapter
 
 @Database(
-    entities = [Category::class, DuaName::class, DuaDetail::class],
-    version = 1,
+    entities = [Category::class, DuaName::class, DuaDetail::class, FavoriteChapter::class],
+    version = 2, // Increment version if you change the schema
     exportSchema = false
 )
 abstract class HisnulMuslimDatabase : RoomDatabase() {
@@ -22,6 +24,7 @@ abstract class HisnulMuslimDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun duaNameDao(): DuaNameDao
     abstract fun duaDetailDao(): DuaDetailDao
+    abstract fun favoriteDao(): FavoriteDao  // <-- Add this method
 
     companion object {
         @Volatile

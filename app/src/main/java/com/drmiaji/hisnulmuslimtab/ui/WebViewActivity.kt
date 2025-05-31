@@ -73,7 +73,8 @@ class WebViewActivity : BaseActivity() {
         repository = HisnulMuslimRepository(
             database.categoryDao(),
             database.duaNameDao(),
-            database.duaDetailDao()
+            database.duaDetailDao(),
+            database.favoriteDao()
         )
     }
 

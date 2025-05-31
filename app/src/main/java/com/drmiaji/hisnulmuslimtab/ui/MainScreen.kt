@@ -397,7 +397,7 @@ fun MainScreen(viewModel: MainViewModel) {
                             text = when (selectedTab) {
                                 MainTab.CATEGORY -> "বিষয় ভিত্তিক সার্চ..."
                                 MainTab.CHAPTERS -> "দো'আ ভিত্তিক সার্চ..."
-                                MainTab.FAVORITES -> "দো'আ ভিত্তিক সার্চ..."
+                                MainTab.FAVORITES -> "ফেভারিট সার্চ..."
                             },
                             fontFamily = FontManager.getSolaimanLipiFontFamily(),
                             fontSize = 16.sp
@@ -456,6 +456,12 @@ fun MainScreen(viewModel: MainViewModel) {
                                         Toast.makeText(context, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
                                     }
                                 }
+                            },
+                            isFavorite = { chapter ->
+                                viewModel.isFavorite(chapter)
+                            },
+                            onToggleFavorite = { chapter ->
+                                viewModel.toggleFavorite(chapter)
                             }
                         )
                     }
@@ -466,9 +472,9 @@ fun MainScreen(viewModel: MainViewModel) {
                     }
                     ChapterListPane(
                         chapters = filteredChapters,
-                        showCategoryTitle = false,
-                        categoryTitle = null,
-                        modifier = Modifier.fillMaxSize(),
+                        showCategoryTitle = selectedCategory != null,
+                        categoryTitle = selectedCategory?.name,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
                         onChapterClick = { chapter ->
                             coroutineScope.launch {
                                 val firstDetailId = viewModel.getFirstDuaDetailIdForChapter(chapter.chap_id)
@@ -484,6 +490,12 @@ fun MainScreen(viewModel: MainViewModel) {
                                     Toast.makeText(context, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
                                 }
                             }
+                        },
+                        isFavorite = { chapter ->
+                            viewModel.isFavorite(chapter)
+                        },
+                        onToggleFavorite = { chapter ->
+                            viewModel.toggleFavorite(chapter)
                         }
                     )
                 }

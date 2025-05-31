@@ -21,7 +21,8 @@ class MainActivity : ComponentActivity() {
                 val repository = HisnulMuslimRepository(
                     db.categoryDao(),
                     db.duaNameDao(),
-                    db.duaDetailDao()
+                    db.duaDetailDao(),
+                    db.favoriteDao()  // Add this line!
                 )
                 @Suppress("UNCHECKED_CAST")
                 return MainViewModel(repository) as T
