@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.viewpager2.widget.ViewPager2
 import com.drmiaji.hisnulmuslimtab.R
 import com.drmiaji.hisnulmuslimtab.activity.About
@@ -132,6 +133,10 @@ class WebViewActivity : BaseActivity() {
     }
 
     private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
+        val showTransliteration = PreferenceManager
+            .getDefaultSharedPreferences(this)
+            .getBoolean("show_transliteration", true)
+
         val htmlBuilder = StringBuilder()
         htmlBuilder.append("""
         <!DOCTYPE html>
@@ -157,22 +162,23 @@ class WebViewActivity : BaseActivity() {
             detail.arabic?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='arabic'>$it</div>")
             }
-            detail.transliteration?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='transliteration'>$it</div>")
+            if (showTransliteration) {
+                detail.transliteration?.takeIf { it.isNotBlank() }?.let {
+                    htmlBuilder.append("<div class='transliteration'><b>উচ্চারণ:</b> $it</div>")
+                }
             }
             detail.translations?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='translation'>$it</div>")
+                htmlBuilder.append("<div class='translation'><b>অনুবাদ:</b> $it</div>")
             }
             detail.bottom?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='bottom-text'>$it</div>")
             }
             detail.reference?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='reference'>Reference: $it</div>")
+                htmlBuilder.append("<div class='reference'><b>তথ্যসূত্র:</b> $it</div>")
             }
 
             htmlBuilder.append("</div></div>")
 
-            // Add divider line between duas (except for the last one)
             if (index < duaDetails.size - 1) {
                 htmlBuilder.append("<hr class='dua-divider'>")
             }
@@ -222,5 +228,9 @@ class WebViewActivity : BaseActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        loadAllDuaPages()
     }
 }

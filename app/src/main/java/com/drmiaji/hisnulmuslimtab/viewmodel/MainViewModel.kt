@@ -15,7 +15,11 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
-enum class MainTab { CATEGORY, CHAPTERS }
+enum class MainTab {
+    CATEGORY,
+    CHAPTERS,
+    FAVORITES
+}
 
 class MainViewModel(
     private val repository: HisnulMuslimRepository
@@ -33,12 +37,25 @@ class MainViewModel(
     val allChapters: StateFlow<List<DuaName>> = repository.getAllDuaNames()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    // We'll keep a MutableStateFlow for favorites (list of chapter IDs)
+    private val _favoriteChapterIds = MutableStateFlow<Set<Int>>(emptySet())
+    val favoriteChapterIds: StateFlow<Set<Int>> = _favoriteChapterIds
+
+    // Expose favorite chapters as filtered from allChapters by favorite IDs
+    val favoriteChapters: StateFlow<List<DuaName>> = combine(allChapters, favoriteChapterIds) { chapters, favIds ->
+        chapters.filter { it.chap_id in favIds }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     val filteredChapters: StateFlow<List<DuaName>> = combine(
-        allChapters, selectedTab, selectedCategory
-    ) { chapters, tab, cat ->
+        allChapters, selectedTab, selectedCategory, favoriteChapterIds
+    ) { chapters, tab, cat, favIds ->
+
         when (tab) {
             MainTab.CHAPTERS -> chapters
-            MainTab.CATEGORY -> cat?.let { chapters.filter { it.category == cat.name } } ?: emptyList()
+
+            MainTab.CATEGORY -> cat?.let { c -> chapters.filter { it.category == c.name } } ?: emptyList()
+
+            MainTab.FAVORITES -> chapters.filter { it.chap_id in favIds }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -52,12 +69,30 @@ class MainViewModel(
         _selectedTab.value = MainTab.CATEGORY
     }
 
+    /** Toggle favorite status for a chapter */
+    fun toggleFavorite(chapter: DuaName) {
+        val currentFavorites = _favoriteChapterIds.value.toMutableSet()
+        if (chapter.chap_id in currentFavorites) {
+            currentFavorites.remove(chapter.chap_id)
+        } else {
+            currentFavorites.add(chapter.chap_id)
+        }
+        _favoriteChapterIds.value = currentFavorites
+        // TODO: persist favorites if needed
+    }
+
+    /** Check if a chapter is favorite */
+    fun isFavorite(chapter: DuaName): Boolean {
+        return chapter.chap_id in _favoriteChapterIds.value
+    }
+
     class Factory(private val repository: HisnulMuslimRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return MainViewModel(repository) as T
         }
     }
+
     suspend fun getFirstDuaDetailIdForChapter(chapId: Int): Int? = withContext(Dispatchers.IO) {
         val duaDetails = repository.getDuaDetailsByGlobalId(chapId).firstOrNull()
         duaDetails?.firstOrNull()?.id

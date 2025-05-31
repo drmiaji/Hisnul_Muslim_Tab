@@ -34,7 +34,8 @@ abstract class HisnulMuslimDatabase : RoomDatabase() {
                     HisnulMuslimDatabase::class.java,
                     "hisnul_muslim_database"
                 )
-                    .createFromAsset("databases/dua.db") // Replace with your actual SQLite file name
+                    .createFromAsset("databases/dua.db")
+                    .fallbackToDestructiveMigration(true) // true = drop all tables on version mismatch
                     .addCallback(DatabaseCallback)
                     .build()
                 INSTANCE = instance

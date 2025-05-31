@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drmiaji.hisnulmuslimtab.data.entities.Category
 import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
+import com.drmiaji.hisnulmuslimtab.utils.toBengaliNumberString
 
 @Composable
 fun CategoryGridPane(
@@ -36,7 +37,8 @@ fun CategoryGridPane(
         modifier = modifier.padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(categories) { category ->
+        val sortedCategories = categories.sortedBy { it.id }
+        items(sortedCategories) { category ->
             Card(
                 onClick = { onCategoryClick(category) },
                 modifier = Modifier
@@ -55,14 +57,14 @@ fun CategoryGridPane(
                         .padding(horizontal = 10.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // You can add an icon here if you wish
                     Spacer(Modifier.width(14.dp))
                     Text(
-                        category.name.orEmpty(),
+                        text = "${category.id.toBengaliNumberString()}. ${category.name.orEmpty()}",
                         fontFamily = FontManager.getSolaimanLipiFontFamily(),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp
+                        fontSize = 16.sp
                     )
+
                 }
             }
         }

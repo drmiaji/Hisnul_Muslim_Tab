@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
@@ -63,13 +64,17 @@ import kotlinx.coroutines.launch
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.draw.clip
 import com.drmiaji.hisnulmuslimtab.activity.About
 import com.drmiaji.hisnulmuslimtab.models.DrawerItem
 import com.drmiaji.hisnulmuslimtab.ui.theme.topBarColors
@@ -299,33 +304,117 @@ fun MainScreen(viewModel: MainViewModel) {
             ) {
                 // Tab Row always visible
                 Row(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    TabText(
-                        text = "ক্যাটাগরি/শ্রেণী",
-                        selected = selectedTab == MainTab.CATEGORY,
-                        onClick = { viewModel.selectTab(MainTab.CATEGORY) }
-                    )
-                    Spacer(Modifier.width(32.dp))
-                    TabText(
-                        text = "বিষয় ভিত্তিক",
-                        selected = selectedTab == MainTab.CHAPTERS,
-                        onClick = { viewModel.selectTab(MainTab.CHAPTERS) }
-                    )
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selectedTab == MainTab.CATEGORY) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier
+                            .clickable { viewModel.selectTab(MainTab.CATEGORY) }
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            text = "বিষয় ভিত্তিক",
+                            fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 10.dp),
+                            color = if (selectedTab == MainTab.CATEGORY) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selectedTab == MainTab.CHAPTERS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier
+                            .clickable { viewModel.selectTab(MainTab.CHAPTERS) }
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            text = "সমস্ত দো'আ",
+                            fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 10.dp),
+                            color = if (selectedTab == MainTab.CHAPTERS) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selectedTab == MainTab.CHAPTERS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier
+                            .clickable { viewModel.selectTab(MainTab.CHAPTERS) }
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            text = "Favorites",
+                            fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 10.dp),
+                            color = if (selectedTab == MainTab.FAVORITES) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
 
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    placeholder = { Text("Search chapters...") },
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surface), // Optional for filled look
+                    placeholder = {
+                        Text(
+                            text = when (selectedTab) {
+                                MainTab.CATEGORY -> "বিষয় ভিত্তিক সার্চ..."
+                                MainTab.CHAPTERS -> "দো'আ ভিত্তিক সার্চ..."
+                                MainTab.FAVORITES -> "দো'আ ভিত্তিক সার্চ..."
+                            },
+                            fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                            fontSize = 16.sp
+                        )
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLeadingIconColor = MaterialTheme.colorScheme.outline
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = FontManager.getSolaimanLipiFontFamily()
+                    ),
                     singleLine = true
                 )
 

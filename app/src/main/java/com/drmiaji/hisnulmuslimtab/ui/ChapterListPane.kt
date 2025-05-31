@@ -13,6 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drmiaji.hisnulmuslimtab.data.entities.DuaName
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.ui.graphics.Color
 import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
 import com.drmiaji.hisnulmuslimtab.utils.toBengaliNumberString
 
@@ -81,6 +85,16 @@ fun ChapterListPane(
                             }
                         }
                     }
+//                    // Favorite icon button on the right
+//                    IconButton(
+//                        onClick = { onToggleFavorite(chapter) }
+//                    ) {
+//                        Icon(
+//                            imageVector = if (isFavorite(chapter)) Icons.Default.Star else Icons.Default.StarBorder,
+//                            contentDescription = if (isFavorite(chapter)) "Remove Favorite" else "Add Favorite",
+//                            tint = if (isFavorite(chapter)) Color.Yellow else MaterialTheme.colorScheme.onSurfaceVariant
+//                        )
+//                    }
                 }
             }
         }
