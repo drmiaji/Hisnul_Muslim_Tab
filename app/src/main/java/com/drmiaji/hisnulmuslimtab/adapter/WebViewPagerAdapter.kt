@@ -11,4 +11,9 @@ class WebViewPagerAdapter(
 ) : FragmentStateAdapter(fa) {
     override fun getItemCount() = htmlPages.size
     override fun createFragment(position: Int): Fragment = WebViewFragment.newInstance(htmlPages[position])
+
+    // Add this to return the plain text or HTML for sharing/copying
+    fun getPageText(position: Int): String {
+        return htmlPages.getOrNull(position) ?: ""
+    }
 }

@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -27,6 +28,9 @@ class WebViewActivity : BaseActivity() {
     private lateinit var repository: HisnulMuslimRepository
     private lateinit var viewPager: ViewPager2
     private val duaIdToChapterName = mutableMapOf<Int, String>()
+    private lateinit var btnFavorite: ImageButton
+    private lateinit var btnCopy: ImageButton
+    private lateinit var btnShare: ImageButton
 
     override fun getLayoutResource() = R.layout.activity_webview
 
@@ -34,6 +38,13 @@ class WebViewActivity : BaseActivity() {
         setupToolbar()
         setupDatabase()
         setupViewPager()
+        btnFavorite = findViewById(R.id.btnFavorite)
+        btnCopy = findViewById(R.id.btnCopy)
+        btnShare = findViewById(R.id.btnShare)
+
+        btnFavorite.setOnClickListener { toggleFavoriteForCurrentChapter() }
+        btnCopy.setOnClickListener { copyCurrentChapterToClipboard() }
+        btnShare.setOnClickListener { shareCurrentChapter() }
         // Load all dua names to populate the chapter name map, then load pages
         lifecycleScope.launch {
             repository.getAllDuaNames().collect { duaNames ->
@@ -42,6 +53,12 @@ class WebViewActivity : BaseActivity() {
                     duaIdToChapterName[duaName.chap_id] = duaName.chapname ?: ""
                 }
                 loadAllDuaPages()
+            }
+        }
+        lifecycleScope.launch {
+            repository.getAllFavorites().collect { favList ->
+                favoriteChapterIds = favList.map { it.chapId }.toSet()
+                updateFavoriteButtonState()
             }
         }
     }
@@ -66,6 +83,65 @@ class WebViewActivity : BaseActivity() {
             DrawableCompat.setTint(wrapped, iconColor)
             toolbar.navigationIcon = wrapped
         }
+    }
+
+    private var currentChapterId: Int? = null
+    private var favoriteChapterIds: Set<Int> = emptySet()
+
+    private fun updateFavoriteButtonState() {
+        val chapId = currentChapterId
+        if (chapId != null && chapId in favoriteChapterIds) {
+            btnFavorite.setImageResource(R.drawable.ic_star) // filled
+        } else {
+            btnFavorite.setImageResource(R.drawable.ic_star_added) // outline
+        }
+    }
+
+    // Call this whenever chapter changes (onPageSelected):
+    private fun onChapterChanged(chapId: Int) {
+        currentChapterId = chapId
+        updateFavoriteButtonState()
+    }
+
+    private fun toggleFavoriteForCurrentChapter() {
+        val chapId = currentChapterId ?: return
+        lifecycleScope.launch {
+            if (chapId in favoriteChapterIds) {
+                repository.removeFavorite(chapId)
+            } else {
+                repository.addFavorite(chapId)
+            }
+            // Re-fetch favorites to update state/UI
+            repository.getAllFavorites().collect { favList ->
+                favoriteChapterIds = favList.map { it.chapId }.toSet()
+                updateFavoriteButtonState()
+            }
+        }
+    }
+
+    private fun getCurrentChapterText(): String {
+        // You must keep the text/html for the current chapter accessible. For example:
+        // If you keep a list of html/text pages as in your viewPager adapter, use the current index:
+        val currentItem = viewPager.currentItem
+        val adapter = viewPager.adapter as? WebViewPagerAdapter
+        return adapter?.getPageText(currentItem) ?: ""
+    }
+
+    private fun copyCurrentChapterToClipboard() {
+        val text = getCurrentChapterText()
+        val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        val clip = android.content.ClipData.newPlainText("Dua/Chapter", text)
+        clipboard.setPrimaryClip(clip)
+        android.widget.Toast.makeText(this, "Copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareCurrentChapter() {
+        val text = getCurrentChapterText()
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        startActivity(Intent.createChooser(shareIntent, "Share using"))
     }
 
     private fun setupDatabase() {
@@ -126,6 +202,9 @@ class WebViewActivity : BaseActivity() {
                             val chapterName = duaIdToChapterName[currentChapterId] ?: getString(R.string.app_name)
                             val titleTextView = findViewById<TextView>(R.id.toolbar_title)
                             titleTextView.text = chapterName
+
+                            // Add this line to update favorite/copy/share state for the current chapter:
+                            onChapterChanged(currentChapterId)
                         }
                     }
                 })

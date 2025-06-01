@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -64,8 +65,8 @@ class MainViewModel(
     // Collect favorites on init and update internal state
     init {
         viewModelScope.launch {
-            repository.getAllFavorites().collect { favoriteList ->
-                _favoriteChapterIds.value = favoriteList.map { it.chapId }.toSet()
+            repository.getAllFavorites().collect { favList ->
+                _favoriteChapterIds.value = favList.map { it.chapId }.toSet()
             }
         }
     }
@@ -91,10 +92,17 @@ class MainViewModel(
 
     // Toggle favorite status
     fun toggleFavorite(chapter: DuaName) {
-        viewModelScope.launch {
-            if (isFavorite(chapter)) {
+        val current = _favoriteChapterIds.value.toMutableSet()
+        if (chapter.chap_id in current) {
+            current.remove(chapter.chap_id)
+            _favoriteChapterIds.value = current
+            viewModelScope.launch {
                 repository.removeFavorite(chapter.chap_id)
-            } else {
+            }
+        } else {
+            current.add(chapter.chap_id)
+            _favoriteChapterIds.value = current
+            viewModelScope.launch {
                 repository.addFavorite(chapter.chap_id)
             }
         }

@@ -497,6 +497,38 @@ fun MainScreen(viewModel: MainViewModel) {
                         }
                     )
                 }
+                if (selectedTab == MainTab.FAVORITES) {
+                    val favoriteChapterIds by viewModel.favoriteChapterIds.collectAsState()
+                    val filteredChapters = remember(allChapters, favoriteChapterIds, searchQuery) {
+                        allChapters
+                            .filter { it.chap_id in favoriteChapterIds }
+                            .filter { searchQuery.isBlank() || it.chapname?.contains(searchQuery, ignoreCase = true) == true }
+                    }
+                    ChapterListPane(
+                        chapters = filteredChapters,
+                        showCategoryTitle = false,
+                        categoryTitle = null,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        onChapterClick = { chapter ->
+                            coroutineScope.launch {
+                                val firstDetailId = viewModel.getFirstDuaDetailIdForChapter(chapter.chap_id)
+                                if (firstDetailId != null) {
+                                    val intent = Intent(context, WebViewActivity::class.java).apply {
+                                        putExtra("dua_id", firstDetailId)
+                                        putExtra("chap_id", chapter.chap_id)
+                                        putExtra("chapter_name", chapter.chapname ?: "")
+                                        putExtra("title", chapter.chapname)
+                                    }
+                                    context.startActivity(intent)
+                                } else {
+                                    Toast.makeText(context, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        isFavorite = { chapter -> favoriteChapterIds.contains(chapter.chap_id) },
+                        onToggleFavorite = { chapter -> viewModel.toggleFavorite(chapter) }
+                    )
+                }
             }
         }
     }

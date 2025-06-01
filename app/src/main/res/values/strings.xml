@@ -30,4 +30,6 @@
     <string name="chapter_name">Chapter Name</string>
     <string name="dua_name">Dua Name</string>
     <string name="_1">1</string>
+    <string name="favorite">Favorite</string>
+    <string name="share">Share</string>
 </resources>
