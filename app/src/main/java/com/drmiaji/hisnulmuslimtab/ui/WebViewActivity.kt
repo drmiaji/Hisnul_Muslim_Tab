@@ -1,12 +1,17 @@
 package com.drmiaji.hisnulmuslimtab.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Html
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
@@ -43,7 +48,10 @@ class WebViewActivity : BaseActivity() {
         btnShare = findViewById(R.id.btnShare)
 
         btnFavorite.setOnClickListener { toggleFavoriteForCurrentChapter() }
-        btnCopy.setOnClickListener { copyCurrentChapterToClipboard() }
+        btnCopy.setOnClickListener {
+            val htmlContent = getCurrentChapterText() // however you get the current chapter's HTML
+            copyCurrentChapterToClipboard(htmlContent)
+        }
         btnShare.setOnClickListener { shareCurrentChapter() }
         // Load all dua names to populate the chapter name map, then load pages
         lifecycleScope.launch {
@@ -117,6 +125,19 @@ class WebViewActivity : BaseActivity() {
                 updateFavoriteButtonState()
             }
         }
+    }
+
+    private fun copyCurrentChapterToClipboard(htmlContent: String) {
+        // Convert HTML to plain text
+        val plainText = Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_LEGACY).toString()
+        // Append your custom ending
+        val finalText = "$plainText\n-হিননুল মূুসলিম থেকে। এপটি ডাউনলোড করতে নিচের লিংকে ক্লিক করুন:\n" +
+                "https://play.google.com/store/apps/details?id=com.drmiaji.hisnulmuslimtab"
+        // Copy to clipboard
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Copied Text", finalText)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
     }
 
     private fun getCurrentChapterText(): String {
