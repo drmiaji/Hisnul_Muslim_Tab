@@ -66,7 +66,10 @@ class MainViewModel(
     init {
         viewModelScope.launch {
             repository.getAllFavorites().collect { favList ->
-                _favoriteChapterIds.value = favList.map { it.chapId }.toSet()
+                val dbSet = favList.map { it.chapId }.toSet()
+                if (dbSet != _favoriteChapterIds.value) {
+                    _favoriteChapterIds.value = dbSet
+                }
             }
         }
     }
