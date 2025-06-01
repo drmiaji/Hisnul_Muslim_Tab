@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drmiaji.hisnulmuslimtab.R
 import com.drmiaji.hisnulmuslimtab.ui.theme.FontManager
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun MyLogo(modifier: Modifier = Modifier) {
@@ -92,16 +93,17 @@ fun MyLogo(modifier: Modifier = Modifier) {
                 // App icon with border and shadow
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(70.dp)
                         .shadow(4.dp, CircleShape)
                         .background(colorScheme.surface, CircleShape)
-                        .padding(4.dp)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.icon),
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
                 }
 
