@@ -93,7 +93,7 @@ fun MyLogo(modifier: Modifier = Modifier) {
                 // App icon with border and shadow
                 Box(
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(60.dp)
                         .shadow(4.dp, CircleShape)
                         .background(colorScheme.surface, CircleShape)
                 ) {

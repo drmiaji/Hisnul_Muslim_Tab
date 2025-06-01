@@ -99,14 +99,7 @@ fun MainScreen(viewModel: MainViewModel) {
             ModalDrawerSheet(
                 modifier = Modifier
                     .width(300.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    ),
+                    .background(Color(0xFF4E5464)), // ← One consistent drawer background
                 drawerContainerColor = Color.Transparent
             ) {
                 Column(
@@ -128,10 +121,11 @@ fun MainScreen(viewModel: MainViewModel) {
                             item {
                                 Text(
                                     text = group.groupTitle,
-                                    modifier = Modifier.padding(start = 24.dp, top = 12.dp, bottom = 6.dp),
+                                    modifier = Modifier.padding(start = 24.dp, top = 12.dp, bottom = 2.dp),
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontFamily = FontManager.getSolaimanLipiFontFamily()
+                                        fontFamily = FontManager.getSolaimanLipiFontFamily(),
+                                        color = MaterialTheme.colorScheme.primaryContainer // or Color.LightGray
                                     )
                                 )
                             }
@@ -162,7 +156,7 @@ fun MainScreen(viewModel: MainViewModel) {
                                     }
                                 )
                             }
-                            item { Spacer(modifier = Modifier.height(10.dp)) }
+                            item { Spacer(modifier = Modifier.height(1.dp)) }
                         }
                     }
                 }

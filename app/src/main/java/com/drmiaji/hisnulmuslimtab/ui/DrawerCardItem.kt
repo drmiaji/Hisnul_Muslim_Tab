@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,15 +50,10 @@ fun DrawerCardItem(
     val shape = RoundedCornerShape(12.dp)
 
     // Animate background color
-    val backgroundColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(durationMillis = 300),
-        label = "bgColor"
-    )
+    val backgroundColor = Color(0xFFF4F7F9) // replace with your desired color
 
-    // Border and icon tint colors
-    val borderColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-    val iconTint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    val borderColor = if (selected) Color(0xFF51A3A3) else Color(0xFFCFD8DC)
+    val iconTint = if (selected) Color(0xFF00796B) else Color(0xFF607D8B)
 
     Card(
         modifier = modifier
