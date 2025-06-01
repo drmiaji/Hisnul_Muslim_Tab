@@ -92,6 +92,7 @@ class MainViewModel(
 
     // Toggle favorite status
     fun toggleFavorite(chapter: DuaName) {
+        // Optimistically update UI state immediately
         val current = _favoriteChapterIds.value.toMutableSet()
         if (chapter.chap_id in current) {
             current.remove(chapter.chap_id)
