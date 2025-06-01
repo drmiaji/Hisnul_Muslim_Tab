@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.drmiaji.hisnulmuslimtab.data.dao.CategoryDao
 import com.drmiaji.hisnulmuslimtab.data.dao.DuaDetailDao
@@ -30,6 +31,17 @@ abstract class HisnulMuslimDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: HisnulMuslimDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+            CREATE TABLE IF NOT EXISTS favorites (
+                chapId INTEGER NOT NULL PRIMARY KEY,
+                isFavorite INTEGER NOT NULL DEFAULT 1
+            )
+        """.trimIndent())
+            }
+        }
+
         fun getDatabase(context: Context): HisnulMuslimDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -38,7 +50,7 @@ abstract class HisnulMuslimDatabase : RoomDatabase() {
                     "hisnul_muslim_database"
                 )
                     .createFromAsset("databases/dua.db")
-                    .fallbackToDestructiveMigration(true) // true = drop all tables on version mismatch
+                    .addMigrations(MIGRATION_1_2)
                     .addCallback(DatabaseCallback)
                     .build()
                 INSTANCE = instance

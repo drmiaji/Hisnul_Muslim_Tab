@@ -68,12 +68,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.draw.clip
 import com.drmiaji.hisnulmuslimtab.activity.About
 import com.drmiaji.hisnulmuslimtab.models.DrawerItem
@@ -320,7 +318,7 @@ fun MainScreen(viewModel: MainViewModel) {
                             .padding(horizontal = 4.dp)
                     ) {
                         Text(
-                            text = "বিষয় ভিত্তিক",
+                            text = "বিষয় ভিত্তিক দো'আ",
                             fontFamily = FontManager.getSolaimanLipiFontFamily(),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -358,10 +356,10 @@ fun MainScreen(viewModel: MainViewModel) {
                         shape = RoundedCornerShape(12.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (selectedTab == MainTab.CHAPTERS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                            containerColor = if (selectedTab == MainTab.FAVORITES) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
                         ),
                         modifier = Modifier
-                            .clickable { viewModel.selectTab(MainTab.CHAPTERS) }
+                            .clickable { viewModel.selectTab(MainTab.FAVORITES) }
                             .padding(horizontal = 4.dp)
                     ) {
                         Text(
@@ -502,20 +500,4 @@ fun MainScreen(viewModel: MainViewModel) {
             }
         }
     }
-}
-
-@Composable
-fun TabText(text: String, selected: Boolean, onClick: () -> Unit) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 24.dp),
-        style = TextStyle(
-            fontFamily = FontManager.getSolaimanLipiFontFamily(),
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            fontSize = 20.sp,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-        )
-    )
 }

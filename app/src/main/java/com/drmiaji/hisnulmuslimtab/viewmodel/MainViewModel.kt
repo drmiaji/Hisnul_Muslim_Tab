@@ -32,33 +32,42 @@ class MainViewModel(
     private val _selectedCategory = MutableStateFlow<Category?>(null)
     val selectedCategory: StateFlow<Category?> = _selectedCategory
 
+    // Favorites management
+    private val _favoriteChapterIds = MutableStateFlow<Set<Int>>(emptySet())
+    val favoriteChapterIds: StateFlow<Set<Int>> = _favoriteChapterIds
+
     val categories: StateFlow<List<Category>> = repository.getAllCategories()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val allChapters: StateFlow<List<DuaName>> = repository.getAllDuaNames()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    // We'll keep a MutableStateFlow for favorites (list of chapter IDs)
-    private val _favoriteChapterIds = MutableStateFlow<Set<Int>>(emptySet())
-    val favoriteChapterIds: StateFlow<Set<Int>> = _favoriteChapterIds
-
-    // Expose favorite chapters as filtered from allChapters by favorite IDs
-    val favoriteChapters: StateFlow<List<DuaName>> = combine(allChapters, favoriteChapterIds) { chapters, favIds ->
-        chapters.filter { it.chap_id in favIds }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
     val filteredChapters: StateFlow<List<DuaName>> = combine(
         allChapters, selectedTab, selectedCategory, favoriteChapterIds
     ) { chapters, tab, cat, favIds ->
-
         when (tab) {
             MainTab.CHAPTERS -> chapters
 
-            MainTab.CATEGORY -> cat?.let { c -> chapters.filter { it.category == c.name } } ?: emptyList()
+            MainTab.CATEGORY -> cat?.let { c ->
+                chapters.filter { it.category == c.name }
+            } ?: emptyList()
 
             MainTab.FAVORITES -> chapters.filter { it.chap_id in favIds }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        emptyList()
+    )
+
+    // Automatically populate _favoriteChapterIds when favorites change
+    init {
+        viewModelScope.launch {
+            repository.getAllFavorites().collect { favoriteList ->
+                _favoriteChapterIds.value = favoriteList.map { it.chapId }.toSet()
+            }
+        }
+    }
 
     fun selectTab(tab: MainTab) {
         _selectedTab.value = tab
@@ -70,7 +79,10 @@ class MainViewModel(
         _selectedTab.value = MainTab.CATEGORY
     }
 
-    /** Toggle favorite status for a chapter */
+    fun isFavorite(chapter: DuaName): Boolean {
+        return chapter.chap_id in _favoriteChapterIds.value
+    }
+
     fun toggleFavorite(chapter: DuaName) {
         viewModelScope.launch {
             if (isFavorite(chapter)) {
@@ -81,9 +93,9 @@ class MainViewModel(
         }
     }
 
-    /** Check if a chapter is favorite */
-    fun isFavorite(chapter: DuaName): Boolean {
-        return chapter.chap_id in _favoriteChapterIds.value
+    suspend fun getFirstDuaDetailIdForChapter(chapId: Int): Int? = withContext(Dispatchers.IO) {
+        val duaDetails = repository.getDuaDetailsByGlobalId(chapId).firstOrNull()
+        duaDetails?.firstOrNull()?.id
     }
 
     class Factory(private val repository: HisnulMuslimRepository) : ViewModelProvider.Factory {
@@ -91,10 +103,5 @@ class MainViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return MainViewModel(repository) as T
         }
-    }
-
-    suspend fun getFirstDuaDetailIdForChapter(chapId: Int): Int? = withContext(Dispatchers.IO) {
-        val duaDetails = repository.getDuaDetailsByGlobalId(chapId).firstOrNull()
-        duaDetails?.firstOrNull()?.id
     }
 }

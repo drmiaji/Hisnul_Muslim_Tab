@@ -20,14 +20,17 @@ class HisnulMuslimRepository(
     private val favoriteDao: FavoriteDao
 ) {
     // Favorite operations
-    val favoriteChapters: Flow<Set<Int>> = favoriteDao.getAllFavorites()
-        .map { list -> list.map { it.chapId }.toSet() }
+    fun getAllFavorites(): Flow<List<FavoriteChapter>> = favoriteDao.getAllFavorites()
 
-    suspend fun isFavorite(chapId: Int): Boolean = favoriteDao.isFavorite(chapId)
+    suspend fun addFavorite(chapterId: Int) {
+        favoriteDao.insertFavorite(FavoriteChapter(chapId = chapterId))
+    }
 
-    suspend fun addFavorite(chapId: Int) = favoriteDao.insertFavorite(FavoriteChapter(chapId))
+    suspend fun removeFavorite(chapterId: Int) {
+        favoriteDao.deleteFavoriteById(chapterId)
+    }
 
-    suspend fun removeFavorite(chapId: Int) = favoriteDao.deleteFavorite(chapId)
+    fun isFavorite(chapterId: Int): Flow<Boolean> = favoriteDao.isFavorite(chapterId)
     // Category operations
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
     suspend fun getCategoryById(id: Int): Category? = categoryDao.getCategoryById(id)
