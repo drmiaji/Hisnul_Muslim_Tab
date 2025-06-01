@@ -38,6 +38,12 @@ class MainViewModel(
     private val _favoriteChapterIds = MutableStateFlow<Set<Int>>(emptySet())
     val favoriteChapterIds: StateFlow<Set<Int>> = _favoriteChapterIds
 
+    private val _pendingAdds = MutableStateFlow<Set<Int>>(emptySet())
+    val pendingAdds: StateFlow<Set<Int>> = _pendingAdds
+
+    private val _pendingRemoves = MutableStateFlow<Set<Int>>(emptySet())
+    val pendingRemoves: StateFlow<Set<Int>> = _pendingRemoves
+
     // Live category and chapter list
     val categories: StateFlow<List<Category>> = repository.getAllCategories()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -67,9 +73,10 @@ class MainViewModel(
         viewModelScope.launch {
             repository.getAllFavorites().collect { favList ->
                 val dbSet = favList.map { it.chapId }.toSet()
-                if (dbSet != _favoriteChapterIds.value) {
-                    _favoriteChapterIds.value = dbSet
-                }
+                _favoriteChapterIds.value = dbSet
+                // Remove IDs from pending sets if DB matches the change
+                _pendingAdds.value = _pendingAdds.value.filter { it !in dbSet }.toSet()
+                _pendingRemoves.value = _pendingRemoves.value.filter { it in dbSet }.toSet()
             }
         }
     }
@@ -95,19 +102,17 @@ class MainViewModel(
 
     // Toggle favorite status
     fun toggleFavorite(chapter: DuaName) {
-        // Optimistically update UI state immediately
-        val current = _favoriteChapterIds.value.toMutableSet()
-        if (chapter.chap_id in current) {
-            current.remove(chapter.chap_id)
-            _favoriteChapterIds.value = current
+        val chapId = chapter.chap_id
+        val isFav = favoriteChapterIds.value.contains(chapId)
+        if (isFav) {
+            _pendingRemoves.value = _pendingRemoves.value + chapId
             viewModelScope.launch {
-                repository.removeFavorite(chapter.chap_id)
+                repository.removeFavorite(chapId)
             }
         } else {
-            current.add(chapter.chap_id)
-            _favoriteChapterIds.value = current
+            _pendingAdds.value = _pendingAdds.value + chapId
             viewModelScope.launch {
-                repository.addFavorite(chapter.chap_id)
+                repository.addFavorite(chapId)
             }
         }
     }

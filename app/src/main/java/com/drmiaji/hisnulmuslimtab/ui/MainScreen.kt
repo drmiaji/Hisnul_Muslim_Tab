@@ -499,9 +499,12 @@ fun MainScreen(viewModel: MainViewModel) {
                 }
                 if (selectedTab == MainTab.FAVORITES) {
                     val favoriteChapterIds by viewModel.favoriteChapterIds.collectAsState()
-                    val filteredChapters = remember(allChapters, favoriteChapterIds, searchQuery) {
+                    val pendingAdds by viewModel.pendingAdds.collectAsState()
+                    val pendingRemoves by viewModel.pendingRemoves.collectAsState()
+                    val effectiveFavorites = (favoriteChapterIds + pendingAdds) - pendingRemoves
+                    val filteredChapters = remember(allChapters, effectiveFavorites, searchQuery) {
                         allChapters
-                            .filter { it.chap_id in favoriteChapterIds }
+                            .filter { it.chap_id in effectiveFavorites }
                             .filter { searchQuery.isBlank() || it.chapname?.contains(searchQuery, ignoreCase = true) == true }
                     }
                     ChapterListPane(
@@ -525,7 +528,7 @@ fun MainScreen(viewModel: MainViewModel) {
                                 }
                             }
                         },
-                        isFavorite = { chapter -> favoriteChapterIds.contains(chapter.chap_id) },
+                        isFavorite = { chapter -> effectiveFavorites.contains(chapter.chap_id) },
                         onToggleFavorite = { chapter -> viewModel.toggleFavorite(chapter) }
                     )
                 }

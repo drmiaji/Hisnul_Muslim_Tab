@@ -91,9 +91,9 @@ class WebViewActivity : BaseActivity() {
     private fun updateFavoriteButtonState() {
         val chapId = currentChapterId
         if (chapId != null && chapId in favoriteChapterIds) {
-            btnFavorite.setImageResource(R.drawable.ic_star) // filled
+            btnFavorite.setImageResource(R.drawable.ic_star_added) // filled
         } else {
-            btnFavorite.setImageResource(R.drawable.ic_star_added) // outline
+            btnFavorite.setImageResource(R.drawable.ic_star) // outline
         }
     }
 
