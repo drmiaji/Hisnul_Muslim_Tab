@@ -2,7 +2,6 @@ package com.drmiaji.hisnulmuslimtab.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
@@ -49,10 +48,14 @@ class WebViewActivity : BaseActivity() {
 
         btnFavorite.setOnClickListener { toggleFavoriteForCurrentChapter() }
         btnCopy.setOnClickListener {
-            val htmlContent = getCurrentChapterText() // however you get the current chapter's HTML
+            val htmlContent = getCurrentChapterText()
             copyCurrentChapterToClipboard(htmlContent)
         }
-        btnShare.setOnClickListener { shareCurrentChapter() }
+
+        btnShare.setOnClickListener {
+            val htmlContent = getCurrentChapterText()
+            shareCurrentChapter(htmlContent)
+        }
         // Load all dua names to populate the chapter name map, then load pages
         lifecycleScope.launch {
             repository.getAllDuaNames().collect { duaNames ->
@@ -127,17 +130,27 @@ class WebViewActivity : BaseActivity() {
         }
     }
 
-    private fun copyCurrentChapterToClipboard(htmlContent: String) {
-        // Convert HTML to plain text
+    private fun getFormattedChapterText(htmlContent: String): String {
         val plainText = Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_LEGACY).toString()
-        // Append your custom ending
-        val finalText = "$plainText\n-হিননুল মূুসলিম থেকে। এপটি ডাউনলোড করতে নিচের লিংকে ক্লিক করুন:\n" +
+        return "$plainText\n-হিননুল মূুসলিম থেকে। এপটি ডাউনলোড করতে নিচের লিংকে ক্লিক করুন:\n" +
                 "https://play.google.com/store/apps/details?id=com.drmiaji.hisnulmuslimtab"
-        // Copy to clipboard
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    }
+
+    private fun copyCurrentChapterToClipboard(htmlContent: String) {
+        val finalText = getFormattedChapterText(htmlContent)
+        val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Copied Text", finalText)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareCurrentChapter(htmlContent: String) {
+        val finalText = getFormattedChapterText(htmlContent)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, finalText)
+        }
+        startActivity(Intent.createChooser(shareIntent, "Share via"))
     }
 
     private fun getCurrentChapterText(): String {
@@ -146,23 +159,6 @@ class WebViewActivity : BaseActivity() {
         val currentItem = viewPager.currentItem
         val adapter = viewPager.adapter as? WebViewPagerAdapter
         return adapter?.getPageText(currentItem) ?: ""
-    }
-
-    private fun copyCurrentChapterToClipboard() {
-        val text = getCurrentChapterText()
-        val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        val clip = android.content.ClipData.newPlainText("Dua/Chapter", text)
-        clipboard.setPrimaryClip(clip)
-        android.widget.Toast.makeText(this, "Copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
-    private fun shareCurrentChapter() {
-        val text = getCurrentChapterText()
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
-        startActivity(Intent.createChooser(shareIntent, "Share using"))
     }
 
     private fun setupDatabase() {
