@@ -125,7 +125,7 @@ fun MainScreen(viewModel: MainViewModel) {
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontManager.getSolaimanLipiFontFamily(),
-                                        color = MaterialTheme.colorScheme.primaryContainer // or Color.LightGray
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant // ✅ Proper text color
                                     )
                                 )
                             }
@@ -140,16 +140,8 @@ fun MainScreen(viewModel: MainViewModel) {
                                                 context.startActivity(Intent(context, item.activityClass))
                                             }
                                             item.linkUrl != null -> {
-                                                if (item.linkUrl.contains("facebook.com")) {
-                                                    val browserIntent = Intent(Intent.ACTION_VIEW, item.linkUrl.toUri())
-                                                    context.startActivity(browserIntent)
-                                                } else {
-                                                    val intent = Intent(context, WebViewActivity::class.java).apply {
-                                                        putExtra("title", item.title)
-                                                        putExtra("url", item.linkUrl)
-                                                    }
-                                                    context.startActivity(intent)
-                                                }
+                                                val browserIntent = Intent(Intent.ACTION_VIEW, item.linkUrl.toUri())
+                                                context.startActivity(browserIntent)
                                             }
                                         }
                                         scope.launch { drawerState.close() }

@@ -49,11 +49,36 @@ fun DrawerCardItem(
 ) {
     val shape = RoundedCornerShape(12.dp)
 
-    // Animate background color
-    val backgroundColor = Color(0xFFF4F7F9) // replace with your desired color
+    // ✅ Use theme-aware colors instead of hardcoded values
+    val backgroundColor = if (selected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
 
-    val borderColor = if (selected) Color(0xFF51A3A3) else Color(0xFFCFD8DC)
-    val iconTint = if (selected) Color(0xFF00796B) else Color(0xFF607D8B)
+    val borderColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    }
+
+    val iconTint = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val textColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val subtitleColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Card(
         modifier = modifier
@@ -111,7 +136,7 @@ fun DrawerCardItem(
                             fontSize = 16.sp,
                             fontFamily = FontManager.getSolaimanLipiFontFamily()
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = textColor // ✅ Dynamic text color
                     )
                     if (item.subtitle.isNotEmpty()) {
                         Text(
@@ -120,7 +145,7 @@ fun DrawerCardItem(
                                 fontSize = 13.sp,
                                 fontFamily = FontManager.getSolaimanLipiFontFamily()
                             ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = subtitleColor // ✅ Dynamic subtitle color
                         )
                     }
                 }

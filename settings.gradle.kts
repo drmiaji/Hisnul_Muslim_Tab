@@ -11,12 +11,15 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
+    // Remove the versionCatalogs block entirely
+    // Gradle automatically creates the "libs" catalog from gradle/libs.versions.toml
 }
 
 rootProject.name = "Hisnul Muslim"

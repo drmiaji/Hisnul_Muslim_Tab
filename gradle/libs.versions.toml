@@ -3,7 +3,7 @@ agp = "8.10.1"
 appcompat = "1.7.0"
 asynclayoutinflater = "1.1.0"
 gson = "2.13.1"
-kotlin = "2.1.20"
+kotlin = "2.1.21"
 coreKtx = "1.16.0"
 kotlinStdlib = "2.1.21"
 kotlinxCoroutinesAndroid = "1.10.2"
@@ -19,6 +19,7 @@ navigationComposeJvmstubs = "2.9.0"
 preferenceKtx = "1.2.1"
 firebaseCrashlyticsBuildtools = "3.0.3"
 roomKtx = "2.7.1"
+ksp = "2.1.21-2.0.1"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -54,4 +55,5 @@ material3 = { module = "androidx.compose.material3:material3", version.ref = "ma
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

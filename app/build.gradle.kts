@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt") // Add this for Room annotation processing
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -15,6 +15,13 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Optional: Configure KSP arguments if needed
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+            arg("room.incremental", "true")
+            arg("room.expandProjection", "true")
+        }
     }
 
     buildTypes {
@@ -27,16 +34,27 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
+
     buildFeatures {
         viewBinding = true
         compose = true
+    }
+}
+
+// This configuration is optional - KSP handles source directories automatically
+// Only keep if you need custom source directory configuration
+kotlin {
+    sourceSets.configureEach {
+        kotlin.srcDir("build/generated/ksp/${name}/kotlin")
     }
 }
 
@@ -68,30 +86,30 @@ dependencies {
     // Navigation (Compose)
     implementation(libs.androidx.navigation.compose.jvmstubs)
 
-    // Material Design           // Material 3 Compose support
-    implementation(libs.material3)                      // Possibly same as above, verify usage
-    implementation(libs.material)                       // Material Design 2 library (Views)
+    // Material Design
+    implementation(libs.material3)
+    implementation(libs.material)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
 
     // Preferences
     implementation(libs.androidx.preference.ktx)
 
-    // Async Layout Inflater (optional)
+    // Async Layout Inflater
     implementation(libs.androidx.asynclayoutinflater)
 
-    // Firebase Crashlytics (build tools)
+    // Firebase Crashlytics
     implementation(libs.firebase.crashlytics.buildtools)
 
     // JSON Parsing
     implementation(libs.gson)
 
-    // Room Database - Add these dependencies
+    // Room Database - ✅ KSP is correctly used here
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx) // For Kotlin Extensions and Coroutines support
-    kapt(libs.androidx.room.compiler) // For annotation processing
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler) // ✅ This is correct for KSP
 
-    // Coroutines (if not already included)
+    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 }
