@@ -99,7 +99,7 @@ fun MainScreen(viewModel: MainViewModel) {
             ModalDrawerSheet(
                 modifier = Modifier
                     .width(300.dp)
-                    .background(Color(0xFF4E5464)), // ← One consistent drawer background
+                    .background(color = MaterialTheme.colorScheme.secondary), // ← One consistent drawer background
                 drawerContainerColor = Color.Transparent
             ) {
                 Column(
@@ -125,7 +125,7 @@ fun MainScreen(viewModel: MainViewModel) {
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontManager.getSolaimanLipiFontFamily(),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant // ✅ Proper text color
+                                        color = MaterialTheme.colorScheme.onSurface // <-- Fix here
                                     )
                                 )
                             }
