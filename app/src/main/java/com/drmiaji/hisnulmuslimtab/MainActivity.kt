@@ -10,6 +10,7 @@ import com.drmiaji.hisnulmuslimtab.data.repository.HisnulMuslimRepository
 import com.drmiaji.hisnulmuslimtab.ui.MainScreen
 import com.drmiaji.hisnulmuslimtab.ui.theme.MyAppTheme
 import com.drmiaji.hisnulmuslimtab.utils.ThemeUtils
+import com.drmiaji.hisnulmuslimtab.utils.UpdateManager
 import com.drmiaji.hisnulmuslimtab.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        ThemeUtils.applyTheme(this)
+        UpdateManager.checkForAppUpdate(this)
+        UpdateManager.completeUpdateIfDownloaded(this)
     }
 }
