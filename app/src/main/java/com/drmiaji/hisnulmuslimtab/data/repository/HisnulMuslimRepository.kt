@@ -51,6 +51,11 @@ class HisnulMuslimRepository(
         }
     }
 
+    suspend fun getChapterIdsMatchingDuaDetails(query: String): List<Int> {
+        // Find all dua detail rows matching the query, then return their chapter (dua_global_id) IDs
+        return searchDuaDetails(query).first().map { it.dua_global_id }.distinct()
+    }
+
     suspend fun getDuaNameByGlobalId(globalId: String): DuaName? =
         duaNameDao.getDuaNameByGlobalId(globalId)
 

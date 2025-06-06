@@ -72,6 +72,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.draw.clip
 import com.drmiaji.hisnulmuslimtab.activity.About
 import com.drmiaji.hisnulmuslimtab.models.DrawerItem
@@ -451,8 +452,12 @@ fun MainScreen(viewModel: MainViewModel) {
                     }
                 }
                 if (selectedTab == MainTab.CHAPTERS) {
-                    val filteredChapters = remember(allChapters, searchQuery) {
-                        allChapters.filter { searchQuery.isBlank() || it.chapname?.contains(searchQuery, ignoreCase = true) == true }
+                    val filteredChapters by produceState(initialValue = allChapters, allChapters, searchQuery, viewModel) {
+                        value = if (selectedTab == MainTab.CHAPTERS) {
+                            viewModel.getChaptersMatchingQuery(searchQuery)
+                        } else {
+                            allChapters
+                        }
                     }
                     ChapterListPane(
                         chapters = filteredChapters,

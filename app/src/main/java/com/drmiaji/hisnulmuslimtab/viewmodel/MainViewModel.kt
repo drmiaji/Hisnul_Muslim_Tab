@@ -28,7 +28,7 @@ class MainViewModel(
 ) : ViewModel() {
 
     // Tab and category selection
-    private val _selectedTab = MutableStateFlow(MainTab.CATEGORY)
+    private val _selectedTab = MutableStateFlow(MainTab.CHAPTERS)
     val selectedTab: StateFlow<MainTab> = _selectedTab
 
     private val _selectedCategory = MutableStateFlow<Category?>(null)
@@ -129,5 +129,16 @@ class MainViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return MainViewModel(repository) as T
         }
+    }
+
+    suspend fun getChaptersMatchingQuery(query: String): List<DuaName> {
+        if (query.isBlank()) return allChapters.value
+        // 1. Match chapters by name
+        val nameMatches = allChapters.value.filter { it.chapname?.contains(query, ignoreCase = true) == true }
+        // 2. Match chapters by dua detail content
+        val detailIds = repository.getChapterIdsMatchingDuaDetails(query)
+        val detailMatches = allChapters.value.filter { it.chap_id in detailIds }
+        // 3. Merge and deduplicate
+        return (nameMatches + detailMatches).distinctBy { it.chap_id }
     }
 }
